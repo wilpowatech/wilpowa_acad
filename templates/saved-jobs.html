@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Saved Jobs | LinkJobs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center h-16">
+      <a href="home.html" class="text-2xl font-bold text-indigo-600">LinkJobs</a>
+      <a href="home.html" class="text-sm bg-gray-100 px-3 py-1 rounded-md">← Back</a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-lg shadow">
+    <h1 class="text-xl font-bold text-indigo-600 mb-4">Saved Jobs</h1>
+    <div id="savedJobsList" class="space-y-4"></div>
+  </main>
+
+  <script>
+    const jobs = JSON.parse(localStorage.getItem('lj_jobs_v1') || '[]');
+    const savedIds = JSON.parse(localStorage.getItem('lj_saved_v1') || '[]');
+    const list = document.getElementById('savedJobsList');
+
+    if (savedIds.length === 0) {
+      list.innerHTML = '<p class="text-gray-500">No saved jobs yet.</p>';
+    } else {
+      savedIds.forEach(id => {
+        const job = jobs.find(j => j.id === id);
+        if (!job) return;
+        const div = document.createElement('div');
+        div.className = 'border-b pb-3';
+        div.innerHTML = `
+          <h2 class="font-semibold text-lg">${job.title}</h2>
+          <p class="text-gray-500">${job.company}</p>
+          <p class="text-sm text-gray-400">${job.location}</p>
+          <a href="job-details.html?id=${job.id}" class="text-indigo-600 text-sm mt-2 inline-block">View Details</a>
+        `;
+        list.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Details | LinkJobs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center h-16">
+      <a href="home.html" class="text-2xl font-bold text-indigo-600">LinkJobs</a>
+      <a href="home.html" class="text-sm bg-gray-100 px-3 py-1 rounded-md">← Back to Jobs</a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto p-6 mt-6 bg-white rounded-lg shadow-sm">
+    <div class="border-b pb-4 mb-4">
+      <h1 id="jobTitle" class="text-2xl font-bold text-indigo-700">Job Title</h1>
+      <p id="jobCompany" class="text-gray-600 mt-1">Company Name</p>
+      <p id="jobLocation" class="text-sm text-gray-500 mt-1">Location</p>
+      <p id="jobType" class="text-xs bg-indigo-100 text-indigo-700 inline-block px-2 py-1 mt-2 rounded">Full-time</p>
+    </div>
+
+    <article id="jobDescription" class="prose max-w-none text-gray-700 leading-relaxed">
+      <p>Loading job details...</p>
+    </article>
+
+    <div class="mt-8 flex justify-end space-x-3">
+      <button id="saveJobBtn" class="px-4 py-2 bg-gray-100 rounded-md">Save Job</button>
+      <button id="applyJobBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Apply Now</button>
+    </div>
+  </main>
+
+  <script>
+    // Load job data from localStorage using jobId in URL
+    const params = new URLSearchParams(location.search);
+    const jobId = params.get("id");
+    const jobs = JSON.parse(localStorage.getItem("lj_jobs_v1") || "[]");
+    const job = jobs.find(j => j.id === jobId);
+
+    if (job) {
+      document.getElementById("jobTitle").textContent = job.title;
+      document.getElementById("jobCompany").textContent = job.company;
+      document.getElementById("jobLocation").textContent = job.location;
+      document.getElementById("jobType").textContent = job.type;
+      document.getElementById("jobDescription").innerHTML = `<p>${job.description}</p>`;
+    }
+
+    document.getElementById("applyJobBtn").addEventListener("click", () => {
+      alert("Application submitted for: " + job.title);
+    });
+  </script>
+</body>
+</html>
