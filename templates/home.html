@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkJobs — Lightweight Job Search</title>
+  <!-- Tailwind CDN (Play CDN for quick demos). For production use PostCSS + build step -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* small helper to show subtle transitions */
+    .fade { transition: all .2s ease-in-out; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased">
+  <!-- NAVBAR -->
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center space-x-4">
+          <div class="text-2xl font-bold text-indigo-600">LinkJobs</div>
+          <nav class="hidden md:flex items-center space-x-3 text-sm text-gray-600">
+            <a href="#" class="hover:text-indigo-600">Jobs</a>
+            <a href="#" class="hover:text-indigo-600">Companies</a>
+            <a href="#" class="hover:text-indigo-600">About</a>
+          </nav>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button id="postJobBtn" class="hidden sm:inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Post a Job</button>
+          <div class="relative">
+            <input id="globalSearch" type="search" placeholder="Search jobs, companies, skills..." class="px-3 py-2 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+          </div>
+          <a href="#" class="ml-2 px-3 py-2 text-sm bg-gray-100 rounded-md">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+      <!-- LEFT: Filters / Profile -->
+      <aside class="lg:col-span-1 space-y-6">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <div class="flex items-center space-x-3">
+            <img src="https://i.pravatar.cc/60?img=12" alt="profile" class="w-12 h-12 rounded-full" />
+            <div>
+              <div class="font-semibold">Ofiare William</div>
+              <div class="text-xs text-gray-500">Software • Web • Data</div>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-600">
+            <div>Location: Benin City, Nigeria</div>
+            <div class="mt-2">Portfolio: <a href="https://wilpowatech.wordpress.com" class="text-indigo-600">wilpowatech.wordpress.com</a></div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="font-semibold mb-3">Filters</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-gray-600">Job Type</label>
+              <select id="filterType" class="w-full mt-1 rounded-md border-gray-200 p-2 text-sm">
+                <option value="any">Any</option>
+                <option value="fulltime">Full-time</option>
+                <option value="parttime">Part-time</option>
+                <option value="contract">Contract</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs text-gray-600">Location</label>
+              <input id="filterLocation" placeholder="e.g. Yenagoa, Lagos" class="w-full mt-1 rounded-md border-gray-200 p-2 text-sm" />
+            </div>
+
+            <div>
+              <label class="text-xs text-gray-600">Min Experience (years)</label>
+              <input id="filterExp" type="number" min="0" value="0" class="w-full mt-1 rounded-md border-gray-200 p-2 text-sm" />
+            </div>
+
+            <div class="flex justify-between">
+              <button id="applyFilters" class="px-3 py-2 bg-indigo-600 text-white rounded-md">Apply</button>
+              <button id="resetFilters" class="px-3 py-2 bg-gray-100 rounded-md">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="font-semibold mb-3">Saved Jobs</h3>
+          <ul id="savedList" class="text-sm text-gray-600 space-y-2">
+            <!-- saved jobs list -->
+          </ul>
+        </div>
+      </aside>
+
+      <!-- CENTER: Job Feed -->
+      <section class="lg:col-span-2">
+        <div class="bg-white p-4 rounded-lg shadow-sm mb-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Jobs</h2>
+            <div class="text-sm text-gray-500">Showing <span id="jobCount">0</span> results</div>
+          </div>
+
+          <div class="mt-4 grid gap-4" id="jobsContainer">
+            <!-- job cards inserted here -->
+          </div>
+        </div>
+
+        <!-- Pagination (simple) -->
+        <div class="flex justify-between items-center">
+          <div class="text-sm text-gray-500">Page <span id="currentPage">1</span></div>
+          <div>
+            <button id="prevPage" class="px-3 py-1 rounded-md bg-gray-100 mr-2">Prev</button>
+            <button id="nextPage" class="px-3 py-1 rounded-md bg-gray-100">Next</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Company Spotlight / Actions -->
+      <aside class="lg:col-span-1 space-y-6">
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="font-semibold">Quick Actions</h3>
+          <div class="mt-3 space-y-2">
+            <button id="createProfileBtn" class="w-full px-3 py-2 bg-green-600 text-white rounded-md">Create Profile</button>
+            <button id="myApplicationsBtn" class="w-full px-3 py-2 bg-indigo-600 text-white rounded-md">My Applications</button>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h3 class="font-semibold">Company Spotlight</h3>
+          <div class="mt-3">
+            <img src="https://placehold.co/600x200?text=Company+Banner" alt="company" class="w-full rounded-md" />
+            <div class="mt-2 text-sm">
+              <div class="font-semibold">Federal Medical Centre, Yenagoa</div>
+              <div class="text-gray-500 text-xs">Hiring across medical and admin roles</div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- POST JOB MODAL -->
+  <div id="jobModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-lg w-full max-w-2xl p-4 shadow-lg">
+      <div class="flex justify-between items-center">
+        <h3 class="font-semibold">Post a Job</h3>
+        <button id="closeModal" class="text-gray-500">✕</button>
+      </div>
+
+      <form id="jobForm" class="mt-3 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <input required name="title" placeholder="Job Title" class="p-2 border rounded" />
+          <input required name="company" placeholder="Company" class="p-2 border rounded" />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required name="location" placeholder="Location" class="p-2 border rounded" />
+          <select name="type" class="p-2 border rounded">
+            <option value="fulltime">Full-time</option>
+            <option value="parttime">Part-time</option>
+            <option value="contract">Contract</option>
+          </select>
+          <input type="number" name="experience" placeholder="Min Experience (yrs)" class="p-2 border rounded" />
+        </div>
+        <textarea required name="description" rows="4" placeholder="Job description, responsibilities, requirements" class="w-full p-2 border rounded"></textarea>
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="cancelPost" class="px-3 py-2 bg-gray-100 rounded">Cancel</button>
+          <button type="submit" class="px-3 py-2 bg-indigo-600 text-white rounded">Publish Job</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed right-4 bottom-4 bg-green-600 text-white px-4 py-2 rounded shadow hidden"></div>
+
+  <!-- JOB TEMPLATE (hidden) -->
+  <template id="jobCardTpl">
+    <div class="bg-white p-4 rounded-lg shadow-sm fade">
+      <div class="flex justify-between items-start">
+        <div class="w-3/4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold job-title">Job Title</h3>
+            <div class="text-xs text-gray-500 job-type">Full-time</div>
+          </div>
+          <div class="text-sm text-gray-500 mt-1 job-company">Company</div>
+          <p class="text-sm text-gray-700 mt-3 job-desc">Short description...</p>
+        </div>
+        <div class="w-1/4 text-right">
+          <div class="text-sm text-gray-500 job-location">Location</div>
+          <div class="mt-3 space-y-2">
+            <button class="applyBtn px-3 py-1 rounded bg-indigo-600 text-white text-sm">Apply</button>
+            <button class="saveBtn px-3 py-1 rounded bg-gray-100 text-sm">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- SCRIPTS -->
+  <script>
+    /*
+      Simple client-side job board demo
+      - Uses localStorage to persist jobs and saved list
+      - Basic filters, pagination, search
+      - Responsive layout via Tailwind
+      - NOTE: For production, move logic to a backend and secure endpoints
+    */
+
+    // ---------- Utilities ----------
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    const toast = (msg) => {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 2500);
+    };
+
+    // ---------- Data handling (localStorage) ----------
+    const JOBS_KEY = 'lj_jobs_v1';
+    const SAVED_KEY = 'lj_saved_v1';
+
+    const sampleJobs = [
+      {
+        id: crypto.randomUUID(),
+        title: 'Programme Analyst II',
+        company: 'Federal Medical Centre, Yenagoa',
+        location: 'Yenagoa, Bayelsa',
+        type: 'fulltime',
+        experience: 2,
+        description: 'Support health programmes with data analysis, build dashboards and automate reports.'
+      },
+      {
+        id: crypto.randomUUID(),
+        title: 'Data Processing Officer',
+        company: 'Federal University of Agriculture, Bassambiri',
+        location: 'Bassambiri, Bayelsa',
+        type: 'fulltime',
+        experience: 1,
+        description: 'Manage data entry, validation and processing of student records.'
+      },
+      {
+        id: crypto.randomUUID(),
+        title: 'IT Support & Web Developer',
+        company: 'M. A. Idaiye & Co.',
+        location: 'Benin City, Edo',
+        type: 'contract',
+        experience: 1,
+        description: 'Maintain website, manage backups and provide technical support.'
+      }
+    ];
+
+    function loadJobs() {
+      const raw = localStorage.getItem(JOBS_KEY);
+      if (!raw) {
+        localStorage.setItem(JOBS_KEY, JSON.stringify(sampleJobs));
+        return sampleJobs.slice();
+      }
+      try { return JSON.parse(raw); } catch (e) { return sampleJobs.slice(); }
+    }
+
+    function saveJobs(jobs) { localStorage.setItem(JOBS_KEY, JSON.stringify(jobs)); }
+
+    function loadSaved() {
+      const raw = localStorage.getItem(SAVED_KEY);
+      if (!raw) { localStorage.setItem(SAVED_KEY, JSON.stringify([])); return []; }
+      try { return JSON.parse(raw); } catch (e) { return []; }
+    }
+    function saveSaved(list) { localStorage.setItem(SAVED_KEY, JSON.stringify(list)); }
+
+    // ---------- Rendering ----------
+    let jobs = loadJobs();
+    let saved = loadSaved();
+
+    const JOBS_PER_PAGE = 5;
+    let currentPage = 1;
+    let filteredJobs = jobs.slice();
+
+    function renderSaved() {
+      const ul = $('#savedList');
+      ul.innerHTML = '';
+      if (saved.length === 0) { ul.innerHTML = '<li class="text-xs text-gray-400">No saved jobs yet</li>'; return; }
+      saved.forEach(id => {
+        const j = jobs.find(x => x.id === id);
+        if (!j) return;
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center';
+        li.innerHTML = `<div class="text-sm">${j.title} <div class="text-xs text-gray-400">${j.company}</div></div><button data-id="${j.id}" class="removeSaved text-red-500 text-xs">Remove</button>`;
+        ul.appendChild(li);
+      });
+      $$('.removeSaved').forEach(b => b.addEventListener('click', (e) => {
+        const id = e.target.dataset.id;
+        saved = saved.filter(x => x !== id);
+        saveSaved(saved);
+        renderSaved();
+        toast('Removed from saved');
+      }));
+    }
+
+    function renderJobs() {
+      const container = $('#jobsContainer');
+      container.innerHTML = '';
+      const start = (currentPage -1) * JOBS_PER_PAGE;
+      const pageJobs = filteredJobs.slice(start, start + JOBS_PER_PAGE);
+
+      $('#jobCount').textContent = filteredJobs.length;
+      $('#currentPage').textContent = currentPage;
+
+      if (pageJobs.length === 0) { container.innerHTML = '<div class="text-center text-gray-500 p-6">No jobs found.</div>'; return; }
+
+      const tpl = document.getElementById('jobCardTpl');
+      pageJobs.forEach(job => {
+        const node = tpl.content.cloneNode(true);
+        node.querySelector('.job-title').textContent = job.title;
+        node.querySelector('.job-company').textContent = job.company;
+        node.querySelector('.job-desc').textContent = job.description;
+        node.querySelector('.job-location').textContent = job.location;
+        node.querySelector('.job-type').textContent = job.type.replace(/^(.)/, s => s.toUpperCase());
+
+        // actions
+        const applyBtn = node.querySelector('.applyBtn');
+        applyBtn.addEventListener('click', () => applyJob(job));
+        const saveBtn = node.querySelector('.saveBtn');
+        saveBtn.addEventListener('click', () => toggleSave(job.id, saveBtn));
+
+        container.appendChild(node);
+      });
+    }
+
+    function toggleSave(id, btn) {
+      if (saved.includes(id)) {
+        saved = saved.filter(x => x !== id);
+        btn.textContent = 'Save';
+        saveSaved(saved);
+        renderSaved();
+        toast('Removed from saved');
+      } else {
+        saved.push(id);
+        btn.textContent = 'Saved';
+        saveSaved(saved);
+        renderSaved();
+        toast('Saved job');
+      }
+    }
+
+    function applyJob(job) {
+      const name = prompt('Enter your full name to apply for "' + job.title + '"');
+      if (!name) return toast('Application cancelled');
+      // For demo, we store applications in localStorage under key apps
+      const appsRaw = localStorage.getItem('lj_apps_v1');
+      const apps = appsRaw ? JSON.parse(appsRaw) : [];
+      apps.push({ id: crypto.randomUUID(), jobId: job.id, name, date: new Date().toISOString() });
+      localStorage.setItem('lj_apps_v1', JSON.stringify(apps));
+      toast('Application submitted');
+    }
+
+    // ---------- Search & Filters ----------
+    function applyFilters() {
+      const q = $('#globalSearch').value.trim().toLowerCase();
+      const type = $('#filterType').value;
+      const loc = $('#filterLocation').value.trim().toLowerCase();
+      const exp = parseInt($('#filterExp').value || 0, 10);
+
+      filteredJobs = jobs.filter(j => {
+        if (type !== 'any' && j.type !== type) return false;
+        if (loc && !j.location.toLowerCase().includes(loc)) return false;
+        if (j.experience < exp) return false;
+        if (q) {
+          const hay = (j.title + ' ' + j.company + ' ' + j.description).toLowerCase();
+          return hay.includes(q);
+        }
+        return true;
+      });
+
+      currentPage = 1;
+      renderJobs();
+    }
+
+    // ---------- Job Posting (modal) ----------
+    function openModal() { $('#jobModal').classList.remove('hidden'); $('#jobModal').classList.add('flex'); }
+    function closeModal() { $('#jobModal').classList.add('hidden'); $('#jobModal').classList.remove('flex'); }
+
+    // ---------- Events ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      // initial renders
+      renderSaved();
+      renderJobs();
+
+      // search debounce
+      let st;
+      $('#globalSearch').addEventListener('input', (e) => { clearTimeout(st); st = setTimeout(() => applyFilters(), 350); });
+
+      $('#applyFilters').addEventListener('click', applyFilters);
+      $('#resetFilters').addEventListener('click', () => { $('#filterType').value = 'any'; $('#filterLocation').value = ''; $('#filterExp').value = 0; $('#globalSearch').value = ''; jobs = loadJobs(); filteredJobs = jobs.slice(); renderJobs(); });
+
+      $('#postJobBtn').addEventListener('click', openModal);
+      $('#closeModal').addEventListener('click', closeModal);
+      $('#cancelPost').addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
+
+      $('#jobForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const newJob = {
+          id: crypto.randomUUID(),
+          title: fd.get('title'),
+          company: fd.get('company'),
+          location: fd.get('location'),
+          type: fd.get('type'),
+          experience: parseInt(fd.get('experience') || 0, 10),
+          description: fd.get('description')
+        };
+        jobs.unshift(newJob);
+        saveJobs(jobs);
+        filteredJobs = jobs.slice();
+        closeModal();
+        renderJobs();
+        toast('Job published');
+        e.target.reset();
+      });
+
+      // pagination
+      $('#prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderJobs(); } });
+      $('#nextPage').addEventListener('click', () => { const max = Math.ceil(filteredJobs.length / JOBS_PER_PAGE); if (currentPage < max) { currentPage++; renderJobs(); } });
+
+      // quick actions
+      $('#createProfileBtn').addEventListener('click', () => alert('Profile builder coming soon — for demo create profile on your portfolio.'));
+      $('#myApplicationsBtn').addEventListener('click', () => {
+        const appsRaw = localStorage.getItem('lj_apps_v1');
+        const apps = appsRaw ? JSON.parse(appsRaw) : [];
+        if (apps.length === 0) return alert('No applications yet');
+        alert('You have ' + apps.length + ' application(s) (demo).');
+      });
+
+      // initial filter state
+      filteredJobs = jobs.slice();
+
+    });
+
+  </script>
+</body>
+</html>
