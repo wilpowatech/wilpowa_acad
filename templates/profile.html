@@ -3,38 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Profile | LinkJobs</title>
+  <title>My Profile | LinkJobs</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 text-gray-800 antialiased">
   <header class="bg-white shadow-sm sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 flex justify-between items-center h-16">
-      <a href="home.html" class="text-2xl font-bold text-indigo-600">LinkJobs</a>
-      <a href="home.html" class="text-sm bg-gray-100 px-3 py-1 rounded-md">← Back</a>
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+      <a href="{{ url_for('home') }}" class="text-2xl font-bold text-indigo-600">LinkJobs</a>
+      <a href="{{ url_for('home') }}" class="text-sm bg-gray-100 px-3 py-1 rounded-md">← Back</a>
     </div>
   </header>
 
   <main class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-lg shadow">
-    <div class="flex items-center space-x-4 mb-6">
-      <img src="https://i.pravatar.cc/80" class="w-16 h-16 rounded-full" />
-      <div>
-        <h2 class="text-xl font-semibold">Ofiare William</h2>
-        <p class="text-gray-500 text-sm">Software Engineer | Web Developer | Data Enthusiast</p>
-      </div>
-    </div>
-
-    <div class="space-y-4">
-      <div>
-        <h3 class="font-semibold text-indigo-600">Contact Info</h3>
-        <p>Email: <a href="mailto:williamkhoko@yahoo.com" class="text-indigo-600">williamkhoko@yahoo.com</a></p>
-        <p>Location: Benin City, Nigeria</p>
-        <p>Portfolio: <a href="https://wilpowatech.wordpress.com" class="text-indigo-600">wilpowatech.wordpress.com</a></p>
-      </div>
-      <div>
-        <h3 class="font-semibold text-indigo-600">Bio</h3>
-        <p>Experienced IT support specialist with knowledge in web engineering, cybersecurity, and AI applications. Passionate about using technology to solve real-world problems.</p>
-      </div>
-    </div>
+    <h1 class="text-xl font-bold text-indigo-600 mb-4">My Profile</h1>
+    <div id="profileContainer"></div>
   </main>
+
+  <script src="js/main.js"></script>
 </body>
 </html>
