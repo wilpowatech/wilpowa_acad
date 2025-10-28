@@ -7,10 +7,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased">
+
 <header class="bg-white shadow-sm sticky top-0 z-40">
   <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
     <a href="{{ url_for('home') }}" class="text-2xl font-bold text-indigo-600 flex items-center">
-      <img src="assets/logo.png" alt="LinkJobs" class="w-8 h-8 mr-2"> LinkJobs
+      <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="LinkJobs" class="w-8 h-8 mr-2"> LinkJobs
     </a>
     <nav class="hidden md:flex space-x-6 text-gray-700">
       <a href="{{ url_for('home') }}" class="hover:text-indigo-600 font-medium">Jobs</a>
@@ -20,51 +21,51 @@
       <a href="{{ url_for('about') }}" class="hover:text-indigo-600 font-medium">About</a>
     </nav>
     <div class="flex items-center space-x-3">
-      <a href="{{ url_for('login') }}" class="text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition">Sign In</a>
-      <a href="{{ url_for('signup') }}" class="text-sm border border-indigo-600 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-50 transition">Sign Up</a>
+      {% if current_user.is_authenticated %}
+        <span class="text-gray-700">Hi, {{ current_user.fullname }}</span>
+        <a href="{{ url_for('logout') }}" class="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="text-sm bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition">Sign In</a>
+        <a href="{{ url_for('signup') }}" class="text-sm border border-indigo-600 text-indigo-600 px-3 py-1 rounded hover:bg-indigo-50 transition">Sign Up</a>
+      {% endif %}
     </div>
   </div>
 </header>
 
+<main class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-lg shadow">
+  <h1 class="text-xl font-bold text-indigo-600 mb-4">Post a Job</h1>
 
-  <main class="max-w-3xl mx-auto mt-8 bg-white p-6 rounded-lg shadow">
-    <h1 class="text-xl font-bold text-indigo-600 mb-4">Post a Job</h1>
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="mb-3 px-3 py-2 rounded {{ 'bg-green-100 text-green-800' if category=='success' else 'bg-red-100 text-red-800' }}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-    <form id="jobForm" class="space-y-4">
-      <input name="title" placeholder="Job Title" class="w-full p-2 border rounded" required />
-      <input name="company" placeholder="Company Name" class="w-full p-2 border rounded" required />
-      <input name="location" placeholder="Location" class="w-full p-2 border rounded" required />
+  <form id="jobForm" method="POST" action="{{ url_for('post_job') }}" class="space-y-4">
+    <input name="title" placeholder="Job Title" class="w-full p-2 border rounded" required />
+    <input name="company" placeholder="Company Name" class="w-full p-2 border rounded" required />
+    <input name="location" placeholder="Location" class="w-full p-2 border rounded" required />
 
-      <select name="type" class="w-full p-2 border rounded">
-        <option value="fulltime">Full-time</option>
-        <option value="parttime">Part-time</option>
-        <option value="contract">Contract</option>
-      </select>
+    <select name="type" class="w-full p-2 border rounded">
+      <option value="fulltime">Full-time</option>
+      <option value="parttime">Part-time</option>
+      <option value="contract">Contract</option>
+    </select>
 
-      <input type="number" name="experience" placeholder="Min Experience (yrs)" class="w-full p-2 border rounded" />
+    <input type="number" name="experience" placeholder="Min Experience (yrs)" class="w-full p-2 border rounded" />
 
-      <textarea name="description" rows="4" placeholder="Job description..." class="w-full p-2 border rounded"></textarea>
+    <textarea name="description" rows="4" placeholder="Job description..." class="w-full p-2 border rounded"></textarea>
 
-      <div class="flex justify-end">
-        <button class="px-4 py-2 bg-indigo-600 text-white rounded">Publish Job</button>
-      </div>
-    </form>
-  </main>
+    <div class="flex justify-end">
+      <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">Publish Job</button>
+    </div>
+  </form>
+</main>
 
-  <script>
-    document.getElementById("jobForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const newJob = Object.fromEntries(fd.entries());
-      newJob.id = crypto.randomUUID();
-      newJob.experience = parseInt(newJob.experience || 0, 10);
-
-      const jobs = JSON.parse(localStorage.getItem("lj_jobs_v1") || "[]");
-      jobs.unshift(newJob);
-      localStorage.setItem("lj_jobs_v1", JSON.stringify(jobs));
-      alert("Job posted successfully!");
-      location.href = "home.html";
-    });
-  </script>
 </body>
 </html>
